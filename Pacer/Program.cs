@@ -8,20 +8,26 @@ using System.IO;
 using System.Threading;
 
 using opennlpinterface;
+using opennlp.tools.lemmatizer;
+
 
 namespace Pacer
 {
     public class NLPTool
     {
-        NLPToolBox nlp_models = null;
+        private NLPToolBox nlp_models = null;
+		private SimpleLemmatizer lemmatizer = null;
         public NLPTool(string SSModel, string TKModel, string POSModel,
             string CKModel, string PersonModel, string OrgModel, string LocModel,
             string DateModel, string MoneyModel, string PercentageModel, string TimeModel,
-            string ParseModel, string MaltParseModel)
+			string ParseModel, string MaltParseModel, string LemmatizeDict)
         {
             nlp_models = new NLPToolBox(SSModel, TKModel, POSModel, CKModel, PersonModel,
                 OrgModel, LocModel, DateModel, MoneyModel, PercentageModel, TimeModel,
                 ParseModel, MaltParseModel);
+			java.io.InputStream input_stream = new java.io.FileInputStream(LemmatizeDict);
+			lemmatizer = new SimpleLemmatizer(input_stream);
+			input_stream.close();
         }
         public List<string> Tokenize(string sentence)
         {
@@ -53,6 +59,18 @@ namespace Pacer
 			foreach (string pos in postags)
 			{
 				ret += pos + " ";
+			}
+			return ret.Substring(0, ret.Length - 1);
+		}
+		public string Lemmatization(string sentence, string postag)
+		{
+			string[] words = sentence.Split(' ');
+			string[] postags = postag.Split(' ');
+			string ret = "";
+			for (int i = 0; i < words.Length; i++)
+			{
+				string lemma = lemmatizer.lemmatize(words[i], postags[i]);
+				ret += lemma + " ";
 			}
 			return ret.Substring(0, ret.Length - 1);
 		}
@@ -97,7 +115,7 @@ namespace Pacer
 			fin.Close();
 			fout.Close();
 		}
-		static void POSTag(string corpus_filename, string output_filename, string config = "default")
+		static void POSTagging(string corpus_filename, string output_filename, string config = "default")
 		{
 			StreamReader fin = new StreamReader(corpus_filename);
 			StreamWriter fout = new StreamWriter(output_filename);
@@ -146,6 +164,61 @@ namespace Pacer
 				default:
 					break;
 			}
+			fin.Close();
+			fout.Close();
+		}
+		static void Lemmatization(string corpus_filename, string output_filename, string config)
+		{
+			StreamReader fin = new StreamReader(corpus_filename);
+			StreamWriter fout = new StreamWriter(output_filename);
+			switch (config)
+			{
+				case "TroFi":
+					for (string line = fin.ReadLine(); line != null; line = fin.ReadLine())
+					{
+						if (line == "********************") // seprate tag
+						{
+							fout.WriteLine(line);
+						}
+						else if (line.StartsWith("***")) // keyword tag
+						{
+							string key_word = line.Substring(3, line.Length - 6);
+							fout.WriteLine(line);
+						}
+						else if (line.StartsWith("*")) // literal cluster || non-literal cluster tag
+						{
+							fout.WriteLine(line);
+						}
+						else if (line.Length < 2) // empty line
+						{
+							fout.WriteLine(line);
+						}
+						else // data line
+						{
+							string[] data = line.Split('\t');
+							if (data.Length == 4)
+							{
+								string lemmatization = nlptool.Lemmatization(data[2], data[3]);
+								fout.WriteLine(data[0] + '\t' + data[1] + '\t' + data[2] + '\t' + data[3] + '\t' + lemmatization);
+								if (lemmatization.Split().Length != data[2].Split().Length) // unexpected case, for debugging
+								{
+									Console.WriteLine("Error Type I: " + line);
+									while (true) { }
+								}
+							}
+							else // unexpect case, for debugging
+							{
+								Console.WriteLine("Error Type II: " + line);
+								while (true) { }
+							}
+						}
+					}
+					break;
+				default:
+					break;
+			}
+			fin.Close();
+			fout.Close();
 		}
         static void Main(string[] args)
         {
@@ -164,17 +237,25 @@ namespace Pacer
             string TimeModel = toolbox_folder + "en-ner-time.bin";
             string ParseModel = toolbox_folder + "en-parser-chunking.bin";
             string MaltParseModel = toolbox_folder + "engmalt.linear-1.7.mco";
+			string LemmatizeDict = toolbox_folder + "en-lemmatizer.dict";
             nlptool = new NLPTool(SSModel, TKModel, POSModel, CKModel,
                 PersonModel, OrgModel, LocModel, DateModel, MoneyModel, PercentageModel,
-                TimeModel, ParseModel, MaltParseModel);
+				TimeModel, ParseModel, MaltParseModel, LemmatizeDict);
 			/*
-			 * This is the toy for tokenization
+			 * This is the toy for tokenization.
 			string output_filename = output_folder + Path.GetFileName(corpus_filename);
 			Tokenization(corpus_filename, output_filename);
 			 */
 
-			POSTag(@"..\..\..\Corpus\TroFi.txt", 
-				@"..\..\..\Data\ProcessedCorpus\POSTag\TroFi.txt", 
+			/*
+			 * This is the toy for POS tagging.
+			POSTagging(@"..\..\..\Corpus\TroFi.txt",
+				@"..\..\..\Data\ProcessedCorpus\POSTag\TroFi.txt",
+				"TroFi");
+			 */
+
+			Lemmatization(@"..\..\..\Data\ProcessedCorpus\POSTag\TroFi.txt", 
+				@"..\..\..\Data\ProcessedCorpus\Lemmatization\TroFi.txt", 
 				"TroFi");
         }
     }

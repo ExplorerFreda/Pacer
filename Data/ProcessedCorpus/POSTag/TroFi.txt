@@ -6780,4 +6780,7 @@ wsj66:7196	N	But the OTC market was withering badly near the close and traders s
 wsj67:1923	N	But the ANC has grown , and black supremacist breakaway groups have withered ./.	CC DT NNP VBZ VBN , CC JJ NN NN NNS VBP VBN .
 wsj68:1963	N	The combination was supposed to make First RepublicBank Texas 's dominant financial institution ; instead , its $ 24.1 billion loan portfolio has withered in the state 's hard-scrabble economy ./.	DT NN VBD VBN TO VB NNP NNP NNP POS JJ JJ NN : RB , PRP$ $ CD CD NN NN VBZ VBN IN DT NN POS JJ NN .
 wsj74:10508	N	Indeed , thanks to a well-oiled political machine and skilled manipulation of Panamanian nationalism and class rivalries , Gen. Noriega may well remain in charge for months , even under withering pressure from the U.S ./.	RB , NNS TO DT JJ JJ NN CC JJ NN IN JJ NN CC NN NNS , NNP NNP MD RB VB IN NN IN NNS , RB IN IN NN IN DT NNP .
-wsj74:4136	N	But by 1985 the boom was over , and sales ha
+wsj74:4136	N	But by 1985 the boom was over , and sales had withered to $ 100 million ./.	CC IN CD DT NN VBD RB , CC NNS VBD VBN TO $ CD CD .
+
+********************
+
