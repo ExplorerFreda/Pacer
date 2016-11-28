@@ -33,3 +33,12 @@ C:\Users\hyshi\Documents\Projects\acl2017\Pacer\Pacer\bin\Debug\NLPTech.pdb
 C:\Users\hyshi\Documents\Projects\acl2017\Pacer\Pacer\obj\Debug\Pacer.csprojResolveAssemblyReference.cache
 C:\Users\hyshi\Documents\Projects\acl2017\Pacer\Pacer\obj\Debug\Pacer.exe
 C:\Users\hyshi\Documents\Projects\acl2017\Pacer\Pacer\obj\Debug\Pacer.pdb
+D:\Pacer\Pacer\bin\Debug\Pacer.exe.config
+D:\Pacer\Pacer\obj\Debug\Pacer.exe
+D:\Pacer\Pacer\obj\Debug\Pacer.pdb
+D:\Pacer\Pacer\bin\Debug\Pacer.exe
+D:\Pacer\Pacer\bin\Debug\Pacer.pdb
+D:\Pacer\Pacer\bin\Debug\NLPTech.dll
+D:\Pacer\Pacer\bin\Debug\OpenNLPInterface.dll
+D:\Pacer\Pacer\bin\Debug\NLPTech.pdb
+D:\Pacer\Pacer\obj\Debug\Pacer.csprojResolveAssemblyReference.cache

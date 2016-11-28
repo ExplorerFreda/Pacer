@@ -45,12 +45,108 @@ namespace Pacer
             }
             return ret;
         }
+		public string POSTagger(string sentence)
+		{
+			string[] tokens = sentence.Split(' ');
+			string[] postags = nlp_models.tagger.tag(tokens);
+			string ret = "";
+			foreach (string pos in postags)
+			{
+				ret += pos + " ";
+			}
+			return ret.Substring(0, ret.Length - 1);
+		}
     }
     class Program
     {
+		static NLPTool nlptool = null;
         static string output_folder = @"..\..\..\Data\ProcessedCorpus\Tokenization\";
         static string corpus_filename = @"..\..\..\Corpus\toy_corpus.txt";
         // static string corpus_filename = @"..\..\..\Corpus\WestburyLab.wikicorp.201004.txt";
+
+		static void Tokenization(string corpus_filename, string output_filename)
+		{
+			StreamReader fin = new StreamReader(corpus_filename);
+			StreamWriter fout = new StreamWriter(output_filename);
+			for (string line = fin.ReadLine(); line != null; line = fin.ReadLine())
+			{
+				line = line.Replace('"', ' ');
+				List<string> sentences = nlptool.SentenceSegment(line);
+				foreach (string sentence in sentences)
+				{
+					List<string> words = nlptool.Tokenize(sentence);
+					foreach (string word in words)
+					{
+						try
+						{
+							byte[] bArray = Encoding.UTF8.GetBytes(word);
+							foreach (byte bElement in bArray)
+							{
+								fout.Write((char)bElement);
+							}
+							fout.Write(" ");
+						}
+						catch (Exception e)
+						{
+							Console.WriteLine("{0} Exception caught.", e);
+						}
+					}
+				}
+				fout.WriteLine();
+			}
+			fin.Close();
+			fout.Close();
+		}
+		static void POSTag(string corpus_filename, string output_filename, string config = "default")
+		{
+			StreamReader fin = new StreamReader(corpus_filename);
+			StreamWriter fout = new StreamWriter(output_filename);
+			switch (config) {
+				case "TroFi":
+					for (string line = fin.ReadLine(); line != null; line = fin.ReadLine())
+					{
+						if (line == "********************") // seprate tag
+						{
+							fout.WriteLine(line);
+						} 
+						else if (line.StartsWith("***")) // keyword tag
+						{
+							string key_word = line.Substring(3, line.Length - 6);
+							fout.WriteLine(line);
+						}
+						else if (line.StartsWith("*")) // literal cluster || non-literal cluster tag
+						{
+							fout.WriteLine(line);
+						}
+						else if (line.Length < 2) // empty line
+						{
+							fout.WriteLine(line);
+						}
+						else // data line
+						{
+							string[] data = line.Split('\t');
+							if (data.Length == 3)
+							{
+								string postag = nlptool.POSTagger(data[2]);
+								fout.WriteLine(data[0] + '\t' + data[1] + '\t' + data[2] + '\t' + postag);
+								if (postag.Split().Length != data[2].Split().Length) // unexpected case, for debugging
+								{
+									Console.WriteLine("Error Type I: " + line);
+									while (true) { }
+								}
+							}
+							else // unexpect case, for debugging
+							{
+								Console.WriteLine("Error Type II: " + line);
+								while (true) { }
+							}
+						}
+					}
+					break;
+				default:
+					break;
+			}
+		}
         static void Main(string[] args)
         {
             // Build the tokenizer
@@ -68,41 +164,18 @@ namespace Pacer
             string TimeModel = toolbox_folder + "en-ner-time.bin";
             string ParseModel = toolbox_folder + "en-parser-chunking.bin";
             string MaltParseModel = toolbox_folder + "engmalt.linear-1.7.mco";
-            NLPTool nlptool = new NLPTool(SSModel, TKModel, POSModel, CKModel,
+            nlptool = new NLPTool(SSModel, TKModel, POSModel, CKModel,
                 PersonModel, OrgModel, LocModel, DateModel, MoneyModel, PercentageModel,
                 TimeModel, ParseModel, MaltParseModel);
-            // Load the corpus
-            string output_filename = output_folder + Path.GetFileName(corpus_filename);
-            StreamReader fin = new StreamReader(corpus_filename);
-            StreamWriter fout = new StreamWriter(output_filename);
-            for (string line = fin.ReadLine(); line != null; line = fin.ReadLine())
-            {
-                line = line.Replace('"', ' ');
-                List<string> sentences = nlptool.SentenceSegment(line);
-                foreach (string sentence in sentences)
-                {
-                    List<string> words = nlptool.Tokenize(sentence);
-                    foreach (string word in words)
-                    {
-                        try
-                        {
-                            byte[] bArray = Encoding.UTF8.GetBytes(word);
-                            foreach (byte bElement in bArray)
-                            {
-                                fout.Write((char)bElement);
-                            }
-                            fout.Write(" ");
-                        }
-                        catch (Exception e)
-                        {
-                            Console.WriteLine("{0} Exception caught.", e);
-                        }
-                    }
-                }
-                fout.WriteLine();
-            }
-            fin.Close();
-            fout.Close();
+			/*
+			 * This is the toy for tokenization
+			string output_filename = output_folder + Path.GetFileName(corpus_filename);
+			Tokenization(corpus_filename, output_filename);
+			 */
+
+			POSTag(@"..\..\..\Corpus\TroFi.txt", 
+				@"..\..\..\Data\ProcessedCorpus\POSTag\TroFi.txt", 
+				"TroFi");
         }
     }
 }
