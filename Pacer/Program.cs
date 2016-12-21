@@ -16,7 +16,7 @@ namespace Pacer
     public class NLPTool
     {
         private NLPToolBox nlp_models = null;
-		private SimpleLemmatizer lemmatizer = null;
+        private SimpleLemmatizer lemmatizer = null;
         public NLPTool(string SSModel, string TKModel, string POSModel,
             string CKModel, string PersonModel, string OrgModel, string LocModel,
             string DateModel, string MoneyModel, string PercentageModel, string TimeModel,
@@ -77,7 +77,7 @@ namespace Pacer
     }
     class Program
     {
-		static NLPTool nlptool = null;
+        static NLPTool nlptool = null;
         static string output_folder = @"..\..\..\Data\ProcessedCorpus\Tokenization\";
         static string corpus_filename = @"..\..\..\Corpus\toy_corpus.txt";
         // static string corpus_filename = @"..\..\..\Corpus\WestburyLab.wikicorp.201004.txt";
@@ -167,6 +167,45 @@ namespace Pacer
 			fin.Close();
 			fout.Close();
 		}
+		static void POSTagMining(string corpus_filename, string output_filename, string pattern_postag)
+		{
+			StreamReader fin = new StreamReader(corpus_filename);
+			StreamWriter fout = new StreamWriter(output_filename);
+			HashSet<string> words = new HashSet<string>();
+			for (string line = fin.ReadLine(); line != null; line = fin.ReadLine())
+			{
+				if (line == "####################")
+				{
+					foreach (string word in words)
+					{
+						fout.WriteLine(word);
+					}
+					fout.WriteLine(line);
+					words.Clear();
+					continue;
+				}
+				List<string> sentences = nlptool.SentenceSegment(line);
+				foreach (string sentence in sentences)
+				{
+					List<string> tokens = nlptool.Tokenize(sentence);
+					string sentence_to_postag = "";
+					foreach (string token in tokens)
+					{
+						sentence_to_postag += token + " ";
+					}
+					string[] postags = nlptool.POSTagger(sentence_to_postag).Split();
+					for (int i = 0; i < postags.Length; i++)
+					{
+						if (postags[i] == pattern_postag)
+						{
+							words.Add(tokens[i]);
+						}
+					}
+				}
+			}
+			fin.Close();
+			fout.Close();
+		}
 		static void Lemmatization(string corpus_filename, string output_filename, string config)
 		{
 			StreamReader fin = new StreamReader(corpus_filename);
@@ -220,7 +259,7 @@ namespace Pacer
 			fin.Close();
 			fout.Close();
 		}
-        static void Main(string[] args)
+		static void Main(string[] args)
         {
             // Build the tokenizer
             string toolbox_folder = @"..\..\..\NLPTech\Toolbox\";
@@ -254,9 +293,16 @@ namespace Pacer
 				"TroFi");
 			 */
 
-			Lemmatization(@"..\..\..\Data\ProcessedCorpus\POSTag\TroFi.txt", 
+			/*
+			 * This is the toy for lemmatizing.
+			 * Lemmatization(@"..\..\..\Data\ProcessedCorpus\POSTag\TroFi.txt", 
 				@"..\..\..\Data\ProcessedCorpus\Lemmatization\TroFi.txt", 
 				"TroFi");
+			 */
+
+			POSTagMining(@"..\..\..\..\Metaphors\data\Corpus\related_data\dictionary_data.txt",
+				@"..\..\..\..\Metaphors\data\Corpus\related_data\central_attributes.txt", 
+				"JJ");
         }
     }
 }
