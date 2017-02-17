@@ -42,3 +42,5 @@ D:\Pacer\Pacer\bin\Debug\NLPTech.dll
 D:\Pacer\Pacer\bin\Debug\OpenNLPInterface.dll
 D:\Pacer\Pacer\bin\Debug\NLPTech.pdb
 D:\Pacer\Pacer\obj\Debug\Pacer.csprojResolveAssemblyReference.cache
+C:\Users\hyshi\Documents\Projects\acl2017\Pacer\Pacer\bin\Debug\Newtonsoft.Json.dll
+C:\Users\hyshi\Documents\Projects\acl2017\Pacer\Pacer\bin\Debug\Newtonsoft.Json.xml

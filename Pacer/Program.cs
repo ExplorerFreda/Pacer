@@ -10,6 +10,7 @@ using System.Threading;
 using opennlpinterface;
 using opennlp.tools.lemmatizer;
 
+using Newtonsoft.Json;
 
 namespace Pacer
 {
@@ -206,7 +207,25 @@ namespace Pacer
 			fin.Close();
 			fout.Close();
 		}
-		static void Lemmatization(string corpus_filename, string output_filename, string config)
+        static void POSTagFromJson(string corpus_filename, string output_filename)
+        {
+            StreamReader fin = new StreamReader(corpus_filename);
+            StreamWriter fout = new StreamWriter(output_filename);
+            for (string line = fin.ReadLine(); line != null; line = fin.ReadLine())
+            {
+                string[] words = JsonConvert.DeserializeObject<string[]>(line);
+                string sentence = string.Join<string>(" ", words);
+                string[] postags = nlptool.POSTagger(sentence).Split();
+                if (words.Length != postags.Length)
+                {
+                    continue;
+                }
+                fout.WriteLine(line + "\t" + JsonConvert.SerializeObject(postags));
+            }
+            fin.Close();
+            fout.Close();
+        }
+        static void Lemmatization(string corpus_filename, string output_filename, string config)
 		{
 			StreamReader fin = new StreamReader(corpus_filename);
 			StreamWriter fout = new StreamWriter(output_filename);
@@ -280,29 +299,28 @@ namespace Pacer
             nlptool = new NLPTool(SSModel, TKModel, POSModel, CKModel,
                 PersonModel, OrgModel, LocModel, DateModel, MoneyModel, PercentageModel,
 				TimeModel, ParseModel, MaltParseModel, LemmatizeDict);
-			/*
+            /*
 			 * This is the toy for tokenization.
 			string output_filename = output_folder + Path.GetFileName(corpus_filename);
 			Tokenization(corpus_filename, output_filename);
 			 */
 
-			/*
+            /*
 			 * This is the toy for POS tagging.
 			POSTagging(@"..\..\..\Corpus\TroFi.txt",
 				@"..\..\..\Data\ProcessedCorpus\POSTag\TroFi.txt",
 				"TroFi");
 			 */
 
-			/*
+            /*
 			 * This is the toy for lemmatizing.
 			 * Lemmatization(@"..\..\..\Data\ProcessedCorpus\POSTag\TroFi.txt", 
 				@"..\..\..\Data\ProcessedCorpus\Lemmatization\TroFi.txt", 
 				"TroFi");
 			 */
 
-			POSTagMining(@"..\..\..\..\Metaphors\data\Corpus\related_data\dictionary_data.txt",
-				@"..\..\..\..\Metaphors\data\Corpus\related_data\central_attributes.txt", 
-				"JJ");
+            POSTagFromJson(@"C:\Users\hyshi\Documents\Projects\acl2017\Pacer\Data\Metaphor-as-as-sentences\as-as-pattern.txt",
+                @"C:\Users\hyshi\Documents\Projects\acl2017\Pacer\Data\Metaphor-as-as-sentences\as-as-pattern-postag.txt");
         }
     }
 }
